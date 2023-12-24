@@ -1,3 +1,15 @@
+## [1.0.2](https://github.com/WebBased-WoDT/usecase-intersection-dt/compare/1.0.1...1.0.2) (2023-12-24)
+
+
+### Performance improvements
+
+* compile code within dockerfile ([1d002e0](https://github.com/WebBased-WoDT/usecase-intersection-dt/commit/1d002e06c234bc292ad54390aef0a125693a33cc))
+
+
+### Build and continuous integration
+
+* use new action for delivery in order to be able to pass secrets to dockerfile ([e884951](https://github.com/WebBased-WoDT/usecase-intersection-dt/commit/e8849519133684d0e3f39a9d52239811ad13e696))
+
 ## [1.0.1](https://github.com/WebBased-WoDT/usecase-intersection-dt/compare/1.0.0...1.0.1) (2023-12-24)
 
 
