@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/WebBased-WoDT/usecase-intersection-dt/compare/1.0.0...1.0.1) (2023-12-24)
+
+
+### Dependency updates
+
+* **core-deps:** update wldt wodt adapter dependency ([bc98eea](https://github.com/WebBased-WoDT/usecase-intersection-dt/commit/bc98eeaafbc494725012f068133a51c62296a31f))
+
 ## 1.0.0 (2023-12-24)
 
 
