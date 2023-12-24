@@ -50,6 +50,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      packages: write
     concurrency:
       # Allow only one release at a time.
       group: release-and-delivery-${{ github.event.number || github.ref }}
