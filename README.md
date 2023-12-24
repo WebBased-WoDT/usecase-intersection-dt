@@ -1,21 +1,20 @@
-# Template for Java projects
+# Use case - Intersection Digital Twin
 
-![Release](https://github.com/AndreaGiulianelli/java-template-project/actions/workflows/build-and-deploy.yml/badge.svg?style=plastic)
+![Release](https://github.com/WebBased-WoDT/usecase-intersection-dt/actions/workflows/build-and-deploy.yml/badge.svg?style=plastic)
 [![License: Apache License](https://img.shields.io/badge/License-Apache_License_2.0-yellow.svg)](https://www.apache.org/licenses/LICENSE-2.0)
-![Version](https://img.shields.io/github/v/release/AndreaGiulianelli/java-template-project?style=plastic)
+![Version](https://img.shields.io/github/v/release/WebBased-WoDT/usecase-intersection-dt?style=plastic)
 
+# Usage
+You need to specify the following environment variable:
+- `EXPOSED_PORT`: the port used to expose the Digital Twin
+- `TRAFFIC_LIGHT_A_URI`: the uri of the Traffic Light A (from use case)
+- `TRAFFIC_LIGHT_B_URI`: the uri of the Traffic Light B (from use case)
+- `PLATFORM_URL`: the platform to which the Digital Twin should register at startup
 
-## Setup
-
-In order to use this template you need to do the following steps:
-1. modify project name in `settings.gradle.kts`
-<!--
-2. [Optional] set up branch protection and a Personal Access Token and modify it in the `release` job for `semantic release`([more here](https://semantic-release.gitbook.io/semantic-release/recipes/ci-configurations/github-actions#pushing-package.json-changes-to-a-master-branch))
--->
-
-## Apps to install when used
-- CodeCov
-- Renovate Bot
-- GitGuardian
-- Mergify
-- SonarCloud
+If you want to run it via docker container:
+1. Provide a `.env` file with all the environment variable described above
+2. Run the container with the command:
+   ```bash
+    docker run ghcr.io/webbased-wodt/usecase-intersection-dt:latest
+    ```
+    1. If you want to pass an environment file whose name is different from `.env` use the `--env-file <name>` parameter.
