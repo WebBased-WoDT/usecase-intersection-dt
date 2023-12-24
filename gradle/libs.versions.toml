@@ -1,0 +1,12 @@
+[versions]
+junit = "5.10.1"
+
+[libraries]
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+
+[bundles]
+java-testing = [ "junit-api" ]
+
+[plugins]
+java-qa = { id = "org.danilopianini.gradle-java-qa", version = "1.31.0"}
