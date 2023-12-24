@@ -39,13 +39,11 @@ jobs:
         with:
           java-version: ${{ matrix.java-version }}
           distribution: adopt
-      - name: Run quality assurance and test with coverage
+      - name: Compile and run quality assurance
+        env:
+          ORG_GRADLE_PROJECT_ghPackageUsername: ${{ secrets.GH_PACKAGES_USERNAME }}
+          ORG_GRADLE_PROJECT_ghPackagesPwd: ${{ secrets.GH_PACKAGES_PASSWORD }}
         run: ./gradlew clean check
-      - name: CodeCov
-        if: ${{ contains('Linux', runner.os) }}
-        uses: codecov/codecov-action@v3.1.4
-        with:
-          directory: "build/reports/jacoco"
 
   release-and-delivery:
     permissions:
@@ -79,29 +77,10 @@ jobs:
           release-command: |
             npm install
             npx semantic-release
-          should-build-and-deliver-container: false
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-  documentation-deploy:
-    needs:
-      - release-and-delivery
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    if: needs.release-and-delivery.outputs.release-status == 'released'
-    steps:
-      - name: Checkout the repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-      - name: Generate and deploy documentation
-        uses: SmartOperatingBlock/documentation-ghp-action@1.1.0
-        with:
-          should-generate-code-documentation: true
-          code-documentation-generation-command: ./gradlew javadoc
-          code-documentation-dst-folder: './build/docs/javadoc'
-          code-documentation-site-folder: 'documentation/code-doc'
+          should-build-and-deliver-container: true
+          container-registry-name: 'ghcr.io'
+          container-registry-username: ${{ github.actor }}
+          container-registry-password: ${{ secrets.GITHUB_TOKEN }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   success:
@@ -110,7 +89,6 @@ jobs:
       - validation
       - build
       - release-and-delivery
-      - documentation-deploy
     if: >-
       always() && (
         contains(join(needs.*.result, ','), 'failure')
