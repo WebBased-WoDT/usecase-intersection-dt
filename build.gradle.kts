@@ -19,13 +19,27 @@ plugins {
     alias(libs.plugins.java.qa)
 }
 
-group = "io.github.andreagiulianelli"
+group = "io.github.webbasedwodt"
+
+val ghPackageUsername: String by project
+val ghPackagesPwd: String by project
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri("https://git.informatik.uni-hamburg.de/api/v4/groups/sane-public/-/packages/maven")
+    }
+    maven {
+        url = uri("https://maven.pkg.github.com/WebBased-WoDT/wldt-wodt-adapter")
+        credentials {
+            username = project.findProperty("ghPackageUsername")?.toString() ?: ghPackageUsername
+            password = project.findProperty("ghPackagesPwd")?.toString() ?: ghPackagesPwd
+        }
+    }
 }
 
 dependencies {
+    implementation(libs.wodt.wldt)
     testImplementation(libs.bundles.java.testing)
     testRuntimeOnly(libs.junit.engine)
 }
