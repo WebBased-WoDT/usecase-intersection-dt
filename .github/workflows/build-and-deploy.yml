@@ -72,7 +72,7 @@ jobs:
         with:
           node-version: "lts/*"
       - name: Release and container delivery
-        uses: SmartOperatingBlock/release-and-delivery-action@1.0.11
+        uses: AndreaGiulianelli/release-and-delivery-action@1.0.0
         with:
           should-release: true
           release-command: |
@@ -82,6 +82,9 @@ jobs:
           container-registry-name: 'ghcr.io'
           container-registry-username: ${{ github.actor }}
           container-registry-password: ${{ secrets.GITHUB_TOKEN }}
+          dockerfile-secrets: |
+            "gh_packages_username=${{ secrets.GH_PACKAGES_USERNAME }}"
+            "gh_packages_password=${{ secrets.GH_PACKAGES_PASSWORD }}"
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
   success:
