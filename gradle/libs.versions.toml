@@ -4,7 +4,7 @@ junit = "5.10.1"
 [libraries]
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
-wodt-wldt = { module = "io.github.webbasedwodt:wldt-wodt-adapter", version = "1.1.2" }
+wodt-wldt = { module = "io.github.webbasedwodt:wldt-wodt-adapter", version = "1.2.0" }
 
 [bundles]
 java-testing = [ "junit-api" ]
