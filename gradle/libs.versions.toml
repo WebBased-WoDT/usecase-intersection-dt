@@ -1,5 +1,5 @@
 [versions]
-junit = "5.10.1"
+junit = "5.10.2"
 
 [libraries]
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
