@@ -16,7 +16,7 @@
 
 plugins {
     id("org.danilopianini.gradle-pre-commit-git-hooks") version "2.0.4"
-    id("com.gradle.enterprise") version "3.16.2"
+    id("com.gradle.enterprise") version "3.17"
 }
 
 rootProject.name = "usecase-intersection-dt"
