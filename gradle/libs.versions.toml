@@ -10,4 +10,4 @@ wodt-wldt = { module = "io.github.webbasedwodt:wldt-wodt-adapter", version = "1.
 java-testing = [ "junit-api" ]
 
 [plugins]
-java-qa = { id = "org.danilopianini.gradle-java-qa", version = "1.42.0"}
+java-qa = { id = "org.danilopianini.gradle-java-qa", version = "1.43.1"}
