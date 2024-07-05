@@ -21,11 +21,15 @@ import io.github.webbasedwodt.physicaladapter.IntersectionPhysicalAdapter;
 import io.github.webbasedwodt.shadowing.MirrorShadowingFunction;
 import io.github.webbasedwodt.adapter.WoDTDigitalAdapter;
 import io.github.webbasedwodt.adapter.WoDTDigitalAdapterConfiguration;
-import it.wldt.core.engine.WldtEngine;
+import it.wldt.core.engine.DigitalTwin;
+import it.wldt.core.engine.DigitalTwinEngine;
 import it.wldt.exception.EventBusException;
 import it.wldt.exception.ModelException;
 import it.wldt.exception.WldtConfigurationException;
+import it.wldt.exception.WldtDigitalTwinStateException;
+import it.wldt.exception.WldtEngineException;
 import it.wldt.exception.WldtRuntimeException;
+import it.wldt.exception.WldtWorkerException;
 
 import java.util.Objects;
 import java.util.Set;
@@ -57,12 +61,13 @@ public final class Launcher {
     public static void main(final String[] args) {
         try {
             final int portNumber = Integer.parseInt(System.getenv(EXPOSED_PORT_VARIABLE));
-            final WldtEngine digitalTwinEngine = new WldtEngine(new MirrorShadowingFunction(), "intersection-dt");
-            digitalTwinEngine.addPhysicalAdapter(new IntersectionPhysicalAdapter(
+            final String intersectionDTId = "intersection-dt";
+            final DigitalTwin intersectionDT = new DigitalTwin(intersectionDTId, new MirrorShadowingFunction());
+            intersectionDT.addPhysicalAdapter(new IntersectionPhysicalAdapter(
                     System.getenv(TRAFFIC_LIGHT_A_URI_VARIABLE),
                     System.getenv(TRAFFIC_LIGHT_B_URI_VARIABLE)
             ));
-            digitalTwinEngine.addDigitalAdapter(new WoDTDigitalAdapter(
+            intersectionDT.addDigitalAdapter(new WoDTDigitalAdapter(
                     "wodt-dt-adapter",
                     new WoDTDigitalAdapterConfiguration(
                             "http://localhost:" + portNumber + "/",
@@ -71,11 +76,17 @@ public final class Launcher {
                             "intersectionPA",
                             Set.of(System.getenv(PLATFORM_URL_VARIABLE)))
             ));
-            digitalTwinEngine.startLifeCycle();
+
+            final DigitalTwinEngine digitalTwinEngine = new DigitalTwinEngine();
+            digitalTwinEngine.addDigitalTwin(intersectionDT);
+            digitalTwinEngine.startDigitalTwin(intersectionDTId);
         } catch (ModelException
-                 | EventBusException
+                 | WldtDigitalTwinStateException
+                 | WldtWorkerException
                  | WldtRuntimeException
-                 | WldtConfigurationException e) {
+                 | EventBusException
+                 | WldtConfigurationException
+                 | WldtEngineException e) {
             Logger.getLogger(Launcher.class.getName()).info(e.getMessage());
         }
     }

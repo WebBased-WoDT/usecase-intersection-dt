@@ -23,21 +23,14 @@ import it.wldt.adapter.physical.event.PhysicalAssetEventWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetPropertyWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceCreatedWldtEvent;
 import it.wldt.adapter.physical.event.PhysicalAssetRelationshipInstanceDeletedWldtEvent;
-import it.wldt.core.model.ShadowingModelFunction;
+import it.wldt.core.model.ShadowingFunction;
 import it.wldt.core.state.DigitalTwinStateAction;
 import it.wldt.core.state.DigitalTwinStateProperty;
 import it.wldt.core.state.DigitalTwinStateRelationship;
 import it.wldt.core.state.DigitalTwinStateRelationshipInstance;
 import it.wldt.exception.EventBusException;
 import it.wldt.exception.ModelException;
-import it.wldt.exception.WldtDigitalTwinStateActionConflictException;
-import it.wldt.exception.WldtDigitalTwinStateActionException;
 import it.wldt.exception.WldtDigitalTwinStateException;
-import it.wldt.exception.WldtDigitalTwinStatePropertyBadRequestException;
-import it.wldt.exception.WldtDigitalTwinStatePropertyConflictException;
-import it.wldt.exception.WldtDigitalTwinStatePropertyException;
-import it.wldt.exception.WldtDigitalTwinStatePropertyNotFoundException;
-import it.wldt.exception.WldtDigitalTwinStateRelationshipException;
 
 import java.util.Map;
 import java.util.logging.Logger;
@@ -45,7 +38,7 @@ import java.util.logging.Logger;
 /**
  * Mirror shadowing function.
  */
-public final class MirrorShadowingFunction extends ShadowingModelFunction {
+public final class MirrorShadowingFunction extends ShadowingFunction {
 
     /**
      * Default constructor.
@@ -72,21 +65,18 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
     @Override
     protected void onDigitalTwinBound(final Map<String, PhysicalAssetDescription> adaptersPhysicalAssetDescriptionMap) {
         try {
+            this.digitalTwinStateManager.startStateTransaction();
+
             //Iterate over all the received PAD from connected Physical Adapters
             adaptersPhysicalAssetDescriptionMap.values().forEach(pad -> {
                 pad.getProperties().forEach(property -> {
                     try {
-                        this.digitalTwinState.createProperty(new DigitalTwinStateProperty<>(
+                        this.digitalTwinStateManager.createProperty(new DigitalTwinStateProperty<>(
                                 property.getKey(),
                                 property.getInitialValue())
                         );
                         this.observePhysicalAssetProperty(property);
-                    } catch (EventBusException
-                             | ModelException
-                             | WldtDigitalTwinStateException
-                             | WldtDigitalTwinStatePropertyException
-                             | WldtDigitalTwinStatePropertyConflictException
-                             | WldtDigitalTwinStatePropertyBadRequestException e) {
+                    } catch (EventBusException | ModelException | WldtDigitalTwinStateException e) {
                         Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
                     }
                 });
@@ -94,16 +84,14 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
                 //Iterate over available declared Physical Actions for the target Physical Adapter's PAD
                 pad.getActions().forEach(action -> {
                     try {
-                        this.digitalTwinState.enableAction(
+                        this.digitalTwinStateManager.enableAction(
                                 new DigitalTwinStateAction(
                                         action.getKey(),
                                         action.getType(),
                                         action.getContentType()
                                 )
                         );
-                    } catch (WldtDigitalTwinStateActionException
-                             | WldtDigitalTwinStateException
-                             | WldtDigitalTwinStateActionConflictException e) {
+                    } catch (WldtDigitalTwinStateException e) {
                         Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
                     }
                 });
@@ -111,7 +99,7 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
                 pad.getRelationships().forEach(relationship -> {
                     try {
                         if (relationship != null) {
-                            this.digitalTwinState.createRelationship(
+                            this.digitalTwinStateManager.createRelationship(
                                     new DigitalTwinStateRelationship<>(
                                             relationship.getName(),
                                             relationship.getName()
@@ -119,17 +107,16 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
                             );
                             observePhysicalAssetRelationship(relationship);
                         }
-                    } catch (WldtDigitalTwinStateRelationshipException
-                             | EventBusException
-                             | ModelException e) {
+                    } catch (EventBusException | ModelException | WldtDigitalTwinStateException e) {
                         Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
                     }
                 });
-
             });
+
+            this.digitalTwinStateManager.commitStateTransaction();
             observeDigitalActionEvents();
             notifyShadowingSync();
-        } catch (EventBusException e) {
+        } catch (WldtDigitalTwinStateException | EventBusException e) {
             Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
         }
     }
@@ -149,13 +136,12 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
     @Override
     protected void onPhysicalAssetPropertyVariation(final PhysicalAssetPropertyWldtEvent<?> physicalAssetPropertyWldtEvent) {
         try {
-            this.digitalTwinState.updateProperty(new DigitalTwinStateProperty<>(
+            this.digitalTwinStateManager.startStateTransaction();
+            this.digitalTwinStateManager.updateProperty(new DigitalTwinStateProperty<>(
                     physicalAssetPropertyWldtEvent.getPhysicalPropertyId(),
                     physicalAssetPropertyWldtEvent.getBody()));
-        } catch (WldtDigitalTwinStatePropertyException
-                 | WldtDigitalTwinStatePropertyBadRequestException
-                 | WldtDigitalTwinStateException
-                 | WldtDigitalTwinStatePropertyNotFoundException e) {
+            this.digitalTwinStateManager.commitStateTransaction();
+        } catch (WldtDigitalTwinStateException e) {
             Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
         }
     }
@@ -183,10 +169,12 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
                     final DigitalTwinStateRelationshipInstance<String> instance =
                             new DigitalTwinStateRelationshipInstance<>(relName, relTargetId, relKey);
 
-                    this.digitalTwinState.addRelationshipInstance(relName, instance);
+                    this.digitalTwinStateManager.startStateTransaction();
+                    this.digitalTwinStateManager.addRelationshipInstance(instance);
+                    this.digitalTwinStateManager.commitStateTransaction();
                 }
             }
-        } catch (WldtDigitalTwinStateRelationshipException e) {
+        } catch (WldtDigitalTwinStateException e) {
             Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
         }
     }
@@ -201,10 +189,12 @@ public final class MirrorShadowingFunction extends ShadowingModelFunction {
                     final String relName = paRelInstance.getRelationship().getName();
                     final String relKey = paRelInstance.getKey();
 
-                    this.digitalTwinState.deleteRelationshipInstance(relName, relKey);
+                    this.digitalTwinStateManager.startStateTransaction();
+                    this.digitalTwinStateManager.deleteRelationshipInstance(relName, relKey);
+                    this.digitalTwinStateManager.commitStateTransaction();
                 }
             }
-        } catch (WldtDigitalTwinStateRelationshipException e) {
+        } catch (WldtDigitalTwinStateException e) {
             Logger.getLogger(MirrorShadowingFunction.class.getName()).info(e.getMessage());
         }
     }

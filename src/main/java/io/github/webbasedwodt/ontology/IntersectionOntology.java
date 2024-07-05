@@ -77,4 +77,9 @@ public final class IntersectionOntology implements DTOntology {
             return Optional.empty();
         }
     }
+
+    @Override
+    public Optional<String> obtainActionType(final String rawAction) {
+        return Optional.empty();
+    }
 }
