@@ -21,7 +21,7 @@ plugins {
 
 group = "io.github.webbasedwodt"
 
-val ghPackageUsername: String by project
+val ghPackagesUsername: String by project
 val ghPackagesPwd: String by project
 
 repositories {
@@ -32,7 +32,7 @@ repositories {
     maven {
         url = uri("https://maven.pkg.github.com/WebBased-WoDT/wldt-wodt-adapter")
         credentials {
-            username = project.findProperty("ghPackageUsername")?.toString() ?: ghPackageUsername
+            username = project.findProperty("ghPackagesUsername")?.toString() ?: ghPackagesUsername
             password = project.findProperty("ghPackagesPwd")?.toString() ?: ghPackagesPwd
         }
     }
