@@ -1,4 +1,4 @@
-FROM alpine:3.21
+FROM alpine:3.24
 COPY ./ .
 RUN apk add openjdk17
 RUN --mount=type=secret,id=gh_packages_username \
